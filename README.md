@@ -1,4 +1,4 @@
-# todo-app-api
+# todo-api
 
 ## Note
 
