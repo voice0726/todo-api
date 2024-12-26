@@ -22,6 +22,7 @@ type Config struct {
 	DBPassword string
 	DBHost     string
 	DBPort     string
+	IsProd     bool
 }
 
 func (c *Config) Validate() error {
@@ -53,6 +54,7 @@ func NewConfig(lg *zap.Logger) (*Config, error) {
 		DBPassword: os.Getenv("DB_PASSWORD"),
 		DBHost:     os.Getenv("DB_HOST"),
 		DBPort:     os.Getenv("DB_PORT"),
+		IsProd:     os.Getenv("IS_PROD") == "true",
 	}
 	cfg.DSN = fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Tokyo",
