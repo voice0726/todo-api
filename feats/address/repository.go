@@ -12,7 +12,7 @@ import (
 type Repository interface {
 	Create(ctx context.Context, address *models.Address) (*models.Address, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*models.Address, error)
-	FindAllByUserID(ctx context.Context, userID uuid.UUID) ([]*models.Address, error)
+	FindAllByUserID(ctx context.Context, userID string) ([]*models.Address, error)
 	Update(ctx context.Context, address *models.Address) (*models.Address, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -42,7 +42,7 @@ func (r *RepositoryImpl) FindByID(ctx context.Context, id uuid.UUID) (*models.Ad
 	return &address, nil
 }
 
-func (r *RepositoryImpl) FindAllByUserID(ctx context.Context, userID uuid.UUID) ([]*models.Address, error) {
+func (r *RepositoryImpl) FindAllByUserID(ctx context.Context, userID string) ([]*models.Address, error) {
 	var addresses []*models.Address
 	if err := r.db.WithContext(ctx).Where("user_id = ?", userID).Find(&addresses).Error; err != nil {
 		return nil, err

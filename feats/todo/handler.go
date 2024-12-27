@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/zitadel/zitadel-go/v3/pkg/authorization"
 	"go.uber.org/zap"
 )
 
@@ -20,6 +20,9 @@ func NewHandler(e *echo.Echo, lg *zap.Logger, repo Repository) *Handler {
 }
 
 func (h *Handler) Find(c echo.Context) error {
+	if !authorization.IsAuthorized(c.Request().Context()) {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "unauthorized"})
+	}
 	todo, err := h.repo.FindByID(c.Request().Context(), 1)
 	if err != nil {
 		if errors.Is(err, ErrRecordNotFound) {
@@ -31,18 +34,11 @@ func (h *Handler) Find(c echo.Context) error {
 }
 
 func (h *Handler) FindAll(c echo.Context) error {
-	userID := c.Get("user_id")
-	if userID == nil {
-		h.lg.Error("user_id is nil")
+	if !authorization.IsAuthorized(c.Request().Context()) {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "unauthorized"})
 	}
-	var uid uuid.UUID
-	var ok bool
-	if uid, ok = userID.(uuid.UUID); !ok {
-		h.lg.Error("user_id is not uuid", zap.Any("user_id", userID))
-		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "unauthorized"})
-	}
-	todos, err := h.repo.FindAllByUserID(c.Request().Context(), uid)
+	userID := authorization.UserID(c.Request().Context())
+	todos, err := h.repo.FindAllByUserID(c.Request().Context(), userID)
 	if err != nil {
 		h.lg.Error("failed to find all todos", zap.Error(err))
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "internal server error"})

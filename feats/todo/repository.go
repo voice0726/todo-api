@@ -3,7 +3,6 @@ package todo
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/voice0726/todo-app-api/infra"
 	"github.com/voice0726/todo-app-api/models"
 )
@@ -11,7 +10,7 @@ import (
 type Repository interface {
 	Create(ctx context.Context, todo *models.Todo) (*models.Todo, error)
 	FindByID(ctx context.Context, id int) (*models.Todo, error)
-	FindAllByUserID(ctx context.Context, userID uuid.UUID) ([]*models.Todo, error)
+	FindAllByUserID(ctx context.Context, userID string) ([]*models.Todo, error)
 	Update(ctx context.Context, todo *models.Todo) (*models.Todo, error)
 	Delete(ctx context.Context, id int) error
 }
@@ -41,7 +40,7 @@ func (r *RepositoryImpl) FindByID(ctx context.Context, id int) (*models.Todo, er
 	return &todo, nil
 }
 
-func (r *RepositoryImpl) FindAllByUserID(ctx context.Context, userID uuid.UUID) ([]*models.Todo, error) {
+func (r *RepositoryImpl) FindAllByUserID(ctx context.Context, userID string) ([]*models.Todo, error) {
 	var todos []*models.Todo
 	if err := r.db.WithContext(ctx).Where("user_id = ?", userID).Find(&todos).Error; err != nil {
 		return nil, err

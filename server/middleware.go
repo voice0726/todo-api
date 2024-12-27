@@ -1,9 +1,6 @@
 package server
 
 import (
-	"path/filepath"
-	"runtime"
-
 	"github.com/labstack/echo/v4"
 	"github.com/zitadel/zitadel-go/v3/pkg/authorization"
 	"github.com/zitadel/zitadel-go/v3/pkg/authorization/oauth"
@@ -11,18 +8,6 @@ import (
 	"github.com/zitadel/zitadel-go/v3/pkg/zitadel"
 	"go.uber.org/zap"
 )
-
-var domain = "localhost"
-var key = "key.json"
-
-func init() {
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("No caller information")
-	}
-	dirname := filepath.Dir(filename)
-	key = filepath.Join(dirname, key)
-}
 
 func (s *Server) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {

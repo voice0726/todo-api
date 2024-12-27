@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/zitadel/zitadel-go/v3/pkg/authorization"
 )
 
 type Handler struct {
@@ -18,6 +19,9 @@ func NewHandler(e *echo.Echo, repo Repository) *Handler {
 }
 
 func (h *Handler) Find(c echo.Context) error {
+	if !authorization.IsAuthorized(c.Request().Context()) {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "unauthorized"})
+	}
 	id := c.Param("id")
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, "id is required")
@@ -38,14 +42,11 @@ func (h *Handler) Find(c echo.Context) error {
 }
 
 func (h *Handler) FindAllByUserID(c echo.Context) error {
-	uid := c.Get("user_id")
-	if uid == nil {
-		return c.JSON(http.StatusUnauthorized, "unauthorized")
+	if !authorization.IsAuthorized(c.Request().Context()) {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "unauthorized"})
 	}
-	if _, ok := uid.(uuid.UUID); !ok {
-		return c.JSON(http.StatusUnauthorized, "unauthorized")
-	}
-	addresses, err := h.repo.FindAllByUserID(c.Request().Context(), uid.(uuid.UUID))
+	userID := authorization.UserID(c.Request().Context())
+	addresses, err := h.repo.FindAllByUserID(c.Request().Context(), userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "internal server error")
 	}
