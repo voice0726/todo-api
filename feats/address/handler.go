@@ -15,7 +15,7 @@ type Handler struct {
 }
 
 func NewHandler(e *echo.Echo, repo Repository) *Handler {
-	return &Handler{e: e}
+	return &Handler{e: e, repo: repo}
 }
 
 func (h *Handler) Find(c echo.Context) error {
