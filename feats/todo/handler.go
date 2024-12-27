@@ -22,7 +22,7 @@ func NewHandler(e *echo.Echo, lg *zap.Logger, repo Repository) *Handler {
 func (h *Handler) Find(c echo.Context) error {
 	todo, err := h.repo.FindByID(c.Request().Context(), 1)
 	if err != nil {
-		if errors.Is(err, ErrNotFound) {
+		if errors.Is(err, ErrRecordNotFound) {
 			return c.JSON(http.StatusNotFound, map[string]string{"message": "todo not found"})
 		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "internal server error"})

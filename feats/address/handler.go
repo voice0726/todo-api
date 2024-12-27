@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 type Handler struct {
@@ -30,7 +29,7 @@ func (h *Handler) Find(c echo.Context) error {
 	}
 	address, err := h.repo.FindByID(c.Request().Context(), uid)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, ErrRecordNotFound) {
 			return c.JSON(http.StatusNotFound, "address not found")
 		}
 		return c.JSON(http.StatusInternalServerError, "internal server error")

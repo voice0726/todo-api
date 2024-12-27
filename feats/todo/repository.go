@@ -6,10 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/voice0726/todo-app-api/infra"
 	"github.com/voice0726/todo-app-api/models"
-	"gorm.io/gorm"
 )
-
-var ErrNotFound = gorm.ErrRecordNotFound
 
 type Repository interface {
 	Create(ctx context.Context, todo *models.Todo) (*models.Todo, error)
@@ -18,6 +15,8 @@ type Repository interface {
 	Update(ctx context.Context, todo *models.Todo) (*models.Todo, error)
 	Delete(ctx context.Context, id int) error
 }
+
+var ErrRecordNotFound = infra.ErrRecordNotFound
 
 type RepositoryImpl struct {
 	db *infra.DataBase

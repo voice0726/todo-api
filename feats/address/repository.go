@@ -17,6 +17,8 @@ type Repository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
+var ErrRecordNotFound = infra.ErrRecordNotFound
+
 type RepositoryImpl struct {
 	db *infra.DataBase
 }

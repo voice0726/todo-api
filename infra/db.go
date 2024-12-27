@@ -12,6 +12,8 @@ import (
 	"github.com/voice0726/todo-app-api/config"
 )
 
+var ErrRecordNotFound = gorm.ErrRecordNotFound
+
 type DataBase struct {
 	dialector gorm.Dialector
 	config    *gorm.Config
