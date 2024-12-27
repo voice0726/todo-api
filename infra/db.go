@@ -3,16 +3,16 @@ package infra
 import (
 	"context"
 
-	"github.com/voice0726/todo-app-api/config"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"moul.io/zapgorm2"
+
+	"github.com/voice0726/todo-app-api/config"
 )
 
 type DataBase struct {
-	lg        *zap.Logger
 	dialector gorm.Dialector
 	config    *gorm.Config
 	*gorm.DB

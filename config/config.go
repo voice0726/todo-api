@@ -7,7 +7,6 @@ import (
 
 	"github.com/joho/godotenv"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 )
 
 var Module = fx.Module("config", fx.Provide(NewConfig), fx.Invoke(func(c *Config) error {
@@ -15,7 +14,6 @@ var Module = fx.Module("config", fx.Provide(NewConfig), fx.Invoke(func(c *Config
 }))
 
 type Config struct {
-	lg         *zap.Logger
 	DSN        string
 	DBName     string
 	DBUser     string
@@ -28,26 +26,27 @@ type Config struct {
 func (c *Config) Validate() error {
 	v := reflect.ValueOf(c).Elem()
 	var e bool
+	es := make([]error, 0)
 	for i := 0; i < v.NumField(); i++ {
 		if v.Field(i).String() == "" {
-			c.lg.Error(fmt.Sprintf("missing required environment variable: %s", v.Type().Field(i).Name))
+			es = append(es, fmt.Errorf("missing required environment variable: %s", v.Type().Field(i).Name))
 			e = true
 		}
 	}
+
 	if e {
-		return fmt.Errorf("missing required environment variables")
+		return fmt.Errorf("missing required environment variables, %v", es)
 	}
 	return nil
 }
 
-func NewConfig(lg *zap.Logger) (*Config, error) {
+func NewConfig() (*Config, error) {
 	err := godotenv.Load()
 	if err != nil {
 		return nil, err
 	}
 
 	cfg := &Config{
-		lg:         lg,
 		DSN:        "",
 		DBName:     os.Getenv("DB_NAME"),
 		DBUser:     os.Getenv("DB_USER"),
