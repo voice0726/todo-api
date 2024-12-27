@@ -10,6 +10,7 @@ import (
 	"moul.io/zapgorm2"
 
 	"github.com/voice0726/todo-app-api/config"
+	"github.com/voice0726/todo-app-api/models"
 )
 
 var ErrRecordNotFound = gorm.ErrRecordNotFound
@@ -37,22 +38,42 @@ func (d *DataBase) Close() error {
 	return db.Close()
 }
 
-func NewDB(c *config.Config, lc fx.Lifecycle) (*DataBase, error) {
+func NewDB(c *config.Config, lg *zap.Logger, lc fx.Lifecycle) *DataBase {
 	psql := postgres.New(postgres.Config{DSN: c.DSN})
-
-	gormConfig := &gorm.Config{
-		Logger: zapgorm2.New(zap.L()),
-	}
-
+	gormConfig := &gorm.Config{Logger: zapgorm2.New(lg)}
 	db := &DataBase{dialector: psql, config: gormConfig}
+
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			return db.Open()
+			err := db.Open()
+			if err != nil {
+				lg.Error("failed to open database connection", zap.Error(err))
+				return err
+			}
+			lg.Info("database connection established")
+			if !c.IsProd {
+				lg.Info("running in development mode")
+				lg.Info("migrating database")
+				err := db.AutoMigrate(models.Todo{}, models.Address{})
+				if err != nil {
+					lg.Error("failed to migrate", zap.Error(err))
+					return err
+				}
+				// todo: add caller to logger
+				lg.Info("migration completed")
+			}
+			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			return db.Close()
+			lg.Info("closing database connection")
+			if err := db.Close(); err != nil {
+				lg.Error("failed to close database connection", zap.Error(err))
+				return err
+			}
+			lg.Info("database connection closed")
+			return nil
 		},
 	})
 
-	return db, nil
+	return db
 }

@@ -32,6 +32,7 @@ func PrepareApp() *fx.App {
 			address.NewHandler,
 		),
 		fx.Provide(server.NewServer),
-		fx.Invoke(func(*server.Server) {}),
+		fx.Invoke(func(base *infra.DataBase) {}),
+		fx.Invoke(func(s *server.Server) {}),
 	)
 }
