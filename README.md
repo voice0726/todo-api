@@ -1,4 +1,4 @@
-# todo-api
+# backend for my nextjs playground
 
 ## Note
 
