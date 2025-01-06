@@ -63,11 +63,11 @@ func NewServer(lg *zap.Logger, config *config.Config, todoHandler *todo.Handler,
 		return nil, err
 	}
 	mw := middleware.New(authZ)
+	s.RegisterRoutes(mw)
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			lg.Info("starting server")
 			go func() {
-				s.Register(mw)
 				if err := e.Start(":8000"); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					e.Logger.Fatal("error starting server", zap.Error(err))
 				}
@@ -88,7 +88,7 @@ func NewServer(lg *zap.Logger, config *config.Config, todoHandler *todo.Handler,
 	return s, nil
 }
 
-func (s *Server) Register(mw *middleware.Interceptor[*oauth.IntrospectionContext]) {
+func (s *Server) RegisterRoutes(mw *middleware.Interceptor[*oauth.IntrospectionContext]) {
 	tg := s.e.Group("/todos", echo.WrapMiddleware(mw.RequireAuthorization()))
 	tg.GET("", s.todoHandler.FindAll)
 	tg.GET("/:id", s.todoHandler.Find)
