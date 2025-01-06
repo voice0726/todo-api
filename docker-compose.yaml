@@ -21,7 +21,7 @@ services:
     networks:
       - 'app'
     image: 'ghcr.io/zitadel/zitadel:latest'
-    container_name: 'todo-zitadel'
+    container_name: 'myapp-zitadel'
     command: 'start-from-init --masterkey "MasterkeyNeedsToHave32Characters" --tlsMode disabled'
     environment:
       ZITADEL_DATABASE_POSTGRES_HOST: db
