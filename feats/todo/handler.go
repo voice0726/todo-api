@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/voice0726/todo-app-api/models"
 	"github.com/zitadel/zitadel-go/v3/pkg/authorization"
 	"go.uber.org/zap"
 )
@@ -44,4 +45,26 @@ func (h *Handler) FindAll(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "internal server error"})
 	}
 	return c.JSON(http.StatusOK, todos)
+}
+
+func (h *Handler) Create(c echo.Context) error {
+	if !authorization.IsAuthorized(c.Request().Context()) {
+		h.lg.Warn("unauthorized request")
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "unauthorized"})
+	}
+
+	todo := new(models.Todo)
+	err := c.Bind(todo)
+	if err != nil {
+		h.lg.Error("failed to bind todo", zap.Error(err))
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request"})
+	}
+	todo.UserID = authorization.UserID(c.Request().Context())
+
+	todo, err = h.repo.Create(c.Request().Context(), todo)
+	if err != nil {
+		h.lg.Error("failed to create todo", zap.Error(err))
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "internal server error"})
+	}
+	return c.JSON(http.StatusCreated, todo)
 }

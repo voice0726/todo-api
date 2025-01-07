@@ -92,6 +92,7 @@ func (s *Server) RegisterRoutes(mw *middleware.Interceptor[*oauth.IntrospectionC
 	tg := s.e.Group("/todos", echo.WrapMiddleware(mw.RequireAuthorization()))
 	tg.GET("", s.todoHandler.FindAll)
 	tg.GET("/:id", s.todoHandler.Find)
+	tg.POST("", s.todoHandler.Create)
 	ag := s.e.Group("/addresses", echo.WrapMiddleware(mw.RequireAuthorization()))
 	ag.GET("", s.addressHandler.FindAllByUserID)
 	ag.GET("/:id", s.addressHandler.Find)
